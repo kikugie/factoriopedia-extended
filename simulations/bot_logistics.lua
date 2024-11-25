@@ -91,6 +91,7 @@ end
 
 function logistics.active_provider_chest()
     local surface = game.surfaces[1]
+    environment.center_viewport()
     environment.roboport(surface, { -1, -5 })
     environment.paste(surface, { -3, 0 }, blueprints.active_provider_chest)
     environment.setup_electricity(surface)

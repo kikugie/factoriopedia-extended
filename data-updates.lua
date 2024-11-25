@@ -18,7 +18,7 @@ end
 apply_simulation(data.raw["tile"]["landfill"], "landfill")
 apply_simulation(data.raw["logistic-container"]["storage-chest"], "storage_chest")
 apply_simulation(data.raw["logistic-container"]["requester-chest"], "requester_chest")
-apply_simulation(data.raw["logistic-container"]["active-provider-chest"], "active_provider_chest")
+apply_simulation(data.raw["logistic-container"]["active-provider-chest"], "active_provider_chest", 30)
 apply_simulation(data.raw["logistic-container"]["passive-provider-chest"], "passive_provider_chest")
 apply_simulation(data.raw["logistic-container"]["buffer-chest"], "buffer_chest")
 
