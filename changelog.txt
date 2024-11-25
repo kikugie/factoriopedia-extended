@@ -1,5 +1,13 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.0
+Date: 26.11.2024
+  Changes:
+    - Aligned the viewport for the active provider chest simulation.
+  Info:
+    - Added release dates.
+    - Set homepage link to personal discord server.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.0
 Date: 25.11.2024
   Major features:
     - Initial release
