@@ -1,0 +1,24 @@
+name: Bug report
+description: Crash or an error in the mod
+labels:
+  - bug
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Description of the issue.
+      placeholder: When I open a page for wood it shows this error:...
+    validations:
+      required: true
+  - type: input
+    id: mods
+    attributes:
+      label: Mods
+      description: List of mods (preferably links) related to the issue.
+      placeholder: https://mods.factorio.com/mod/Ultracube, ...
+  - type: markdown
+    attributes:
+      value: >-
+        This template was generated with [Issue Forms
+        Creator](https://issue-forms-creator.netlify.app)

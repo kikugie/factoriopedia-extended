@@ -25,6 +25,7 @@ excluded=(
   ".git"
   ".run"
   ".idea"
+  ".github"
   "releases"
   "node_modules"
 )
