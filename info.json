@@ -1,0 +1,13 @@
+{
+  "name": "factoriopedia-extended",
+  "version": "0.1.0",
+  "title": "Factoriopedia Extended",
+  "author": "KikuGie",
+  "homepage": "https://github.com/kikugie/factoriopedia-extended",
+  "description": "Enhances the factoriopedia simulations",
+  "factorio_version": "2.0",
+  "dependencies": [
+    "base",
+    "? space-age"
+  ]
+}
