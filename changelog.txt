@@ -1,2 +1,16 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.0
+  Major features:
+    - Initial release
+  Features:
+    - Added simulation for landfill.
+    - Added simulations for inserters.
+    - Added simulations for logistic chests.
+    - Added simulations for mining drills.
+  Debug:
+    - Added "Dev mode" setting to access utility items.
+  Info:
+    - Added mod information in README.md.
+  Scripting:
+    - Added `library/story.lua` to handle looped events.
+    - Added `library/environment.lua` with common simulation setup utilities.
