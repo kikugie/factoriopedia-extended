@@ -54,7 +54,12 @@ end)
 modify(data.raw["inserter"]["bulk-inserter"], function(it)
     it.extension_speed = 100
     it.rotation_speed = 100
-    it.stack_size_bonus = 100
+    it.energy_source = { type = "void" }
+end)
+
+modify(data.raw["inserter"]["long-handed-inserter"], function(it)
+    it.extension_speed = 100
+    it.rotation_speed = 100
     it.energy_source = { type = "void" }
 end)
 

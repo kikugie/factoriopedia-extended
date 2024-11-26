@@ -96,9 +96,35 @@ end
 function belt_logistics.splitter(name, related_belt)
     local surface = game.surfaces[1]
     environment.center_viewport()
+    game.simulation.camera_alt_info = true
 
-    local splitter = surface.create_entity { name = name, position = { 0, -1 }, direction = defines.direction.east }
-    -- TODO: Rest of the simulation
+    local underground_belt = prototypes.entity[related_belt].related_underground_belt.name
+    local splitter = surface.create_entity { name = name, position = { 0, 0 }, direction = defines.direction.east }
+    for x = -8, 8 do
+        surface.create_entity { name = related_belt, position = { x, -1 }, direction = defines.direction.east }
+        surface.create_entity { name = related_belt, position = { x, 0 }, direction = defines.direction.east }
+    end
+    surface.create_entity { name = related_belt, position = { -9, -1 }, direction = defines.direction.east }
+    surface.create_entity { name = related_belt, position = { -10, -1 }, direction = defines.direction.east }
+    surface.create_entity { name = underground_belt, position = { -11, 0 }, direction = defines.direction.east }
+    surface.create_entity { name = underground_belt, position = { -9, 0 }, direction = defines.direction.west }
+    environment.paste(surface, { -10, 0 }, blueprints.splitter_env)
+    environment.paste(surface, { 11, 0 }, blueprints.splitter_env2)
+
+    local sequence = new_sequence()
+    sequence:event(0, function()
+        splitter.splitter_filter = nil
+        splitter.splitter_output_priority = "none"
+    end)
+    sequence:event(180, function()
+        splitter.splitter_filter = "iron-gear-wheel"
+        splitter.splitter_output_priority = "left"
+    end)
+    sequence:event(360, function()
+        splitter.splitter_filter = "deconstruction-planner"
+        splitter.splitter_output_priority = "right"
+    end)
+    sequence:finish(540, 540)
 end
 
 return belt_logistics
