@@ -15,6 +15,12 @@ local function apply_simulation(prototype, name, prepare)
     table.insert(extended, prototype)
 end
 
+local function apply_to_group(table, name, prepare)
+    for _, entity in pairs(table) do
+        apply_simulation(entity, name .. "\", \"" .. entity.name, prepare)
+    end
+end
+
 apply_simulation(data.raw["tile"]["landfill"], "landfill")
 apply_simulation(data.raw["logistic-container"]["storage-chest"], "storage_chest")
 apply_simulation(data.raw["logistic-container"]["requester-chest"], "requester_chest")
@@ -22,13 +28,9 @@ apply_simulation(data.raw["logistic-container"]["active-provider-chest"], "activ
 apply_simulation(data.raw["logistic-container"]["passive-provider-chest"], "passive_provider_chest")
 apply_simulation(data.raw["logistic-container"]["buffer-chest"], "buffer_chest")
 
-for _, entity in pairs(data.raw["inserter"]) do
-    apply_simulation(entity, "inserter\", \"" .. entity.name, 420)
-end
-
-for _, entity in pairs(data.raw["mining-drill"]) do
-    apply_simulation(entity, "mining_drill\", \"" .. entity.name)
-end
+apply_to_group(data.raw["inserter"], "inserter", 420)
+apply_to_group(data.raw["roboport"], "roboport")
+apply_to_group(data.raw["mining-drill"], "mining_drill")
 
 if #extended > 0 then
     data:extend(extended)

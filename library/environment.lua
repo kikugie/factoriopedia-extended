@@ -16,8 +16,9 @@ function environment.viewport_height(tiles)
     game.simulation.camera_zoom = scale
 end
 
-function environment.center_viewport()
-    if game.simulation then game.simulation.camera_position = { 0.5, 0 } end
+---@param y number?
+function environment.center_viewport(y)
+    if game.simulation then game.simulation.camera_position = { 0.5, y or 0 } end
 end
 
 function environment.research_all()

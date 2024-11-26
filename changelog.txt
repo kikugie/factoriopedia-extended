@@ -9,7 +9,7 @@ Date: 26.11.2024
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.0
 Date: 25.11.2024
-  Major features:
+  Major Features:
     - Initial release
   Features:
     - Added simulation for landfill.

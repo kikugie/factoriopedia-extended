@@ -11,10 +11,8 @@ local dev_mode = settings.startup["factoriopedia-extended-dev-mode"].value
 local function modify(prototype, action)
     local copy = table.deepcopy(prototype)
     copy.name = constants.mod_name .. "-" .. prototype.name
-    if not dev_mode then
-        copy.hidden = true
-    end
     copy.hidden_in_factoriopedia = true
+    if not dev_mode then copy.hidden = true end
     action(copy)
     table.insert(extended, copy)
     if prototype.type ~= "item" then

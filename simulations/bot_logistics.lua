@@ -1,10 +1,10 @@
 ---@diagnostic disable: need-check-nil
 require "library.story"
-local environment = require "library.environment"
-local blueprints  = require "blueprints"
-local logistics   = {}
+local environment   = require "library.environment"
+local blueprints    = require "blueprints"
+local bot_logistics = {}
 
-function logistics.storage_chest()
+function bot_logistics.storage_chest()
     local surface = game.surfaces[1]
     environment.center_viewport()
     environment.roboport(surface, { 0, -5 })
@@ -25,7 +25,7 @@ function logistics.storage_chest()
     sequence:finish(360)
 end
 
-function logistics.requester_chest()
+function bot_logistics.requester_chest()
     local surface = game.surfaces[1]
     environment.center_viewport()
     environment.roboport(surface, { -1, -5 })
@@ -33,7 +33,7 @@ function logistics.requester_chest()
 
     local requester = environment.container(surface, "requester-chest", { -2, 0 })
     local storage = environment.container(surface, "storage-chest", { 2, 0 })
-    ---@type LuaLogisticSection
+    ---@type Luabot_logisticsection
     local section = requester.get_logistic_sections().add_section("")
     section.active = false
     section.set_slot(1, { value = "iron-gear-wheel", min = 10 })
@@ -57,7 +57,7 @@ function logistics.requester_chest()
     sequence:finish(240)
 end
 
-function logistics.passive_provider_chest()
+function bot_logistics.passive_provider_chest()
     local surface = game.surfaces[1]
     game.simulation.camera_alt_info = true
     environment.center_viewport()
@@ -65,7 +65,7 @@ function logistics.passive_provider_chest()
 
     local storage = environment.container(surface, "passive-provider-chest", { -2, 0 })
     local requester = environment.container(surface, "requester-chest", { 2, 0 })
-    ---@type LuaLogisticSection
+    ---@type Luabot_logisticsection
     local section = requester.get_logistic_sections().add_section("")
     section.active = false
     section.set_slot(1, { value = "iron-gear-wheel", min = 10 })
@@ -89,7 +89,7 @@ function logistics.passive_provider_chest()
     sequence:finish(240)
 end
 
-function logistics.active_provider_chest()
+function bot_logistics.active_provider_chest()
     local surface = game.surfaces[1]
     environment.center_viewport()
     environment.roboport(surface, { -1, -5 })
@@ -114,7 +114,7 @@ function logistics.active_provider_chest()
     sequence:finish(120)
 end
 
-function logistics.buffer_chest()
+function bot_logistics.buffer_chest()
     local surface = game.surfaces[1]
     game.simulation.camera_alt_info = true
     environment.center_viewport()
@@ -155,4 +155,30 @@ function logistics.buffer_chest()
     sequence:finish(270)
 end
 
-return logistics
+function bot_logistics.roboport(name)
+    local surface = game.surfaces[1]
+    local roboport = prototypes.entity[name]
+
+    if roboport.tile_width % 2 == 1 then environment.center_viewport(-1)
+    else game.simulation.camera_position = {0, -1} end
+    environment.viewport_height(roboport.tile_height + 2)
+    environment.setup_electricity(surface)
+    environment.research_all()
+
+    local roboport_entity = surface.create_entity { name = name, position = { 0, 0 } }
+    roboport_entity.get_inventory(defines.inventory.roboport_robot).insert("construction-robot")
+
+    local sequence = new_sequence()
+    sequence:event(30, function()
+        environment.paste(surface, { 0, 0 }, blueprints.roboport_env)
+        for _, entity in pairs(surface.find_entities_filtered { name = "storage-chest", area = { { -25, -15 }, { 25, 15 } } }) do
+            entity.get_inventory(defines.inventory.chest).clear()
+        end
+        for _, entity in pairs(surface.find_entities_filtered { name = "solar-panel", area = { { -25, -15 }, { 25, 15 } } }) do
+            entity.order_deconstruction(environment.default_force)
+        end
+    end)
+    sequence:finish(600)
+end
+
+return bot_logistics
