@@ -31,6 +31,21 @@ apply_simulation(data.raw["logistic-container"]["buffer-chest"], "buffer_chest")
 apply_to_group(data.raw["inserter"], "inserter", 420)
 apply_to_group(data.raw["roboport"], "roboport")
 apply_to_group(data.raw["mining-drill"], "mining_drill")
+apply_to_group(data.raw["transport-belt"], "belt", 600)
+for _, entity in pairs(data.raw["splitter"]) do
+    apply_simulation(entity, "splitter\", \"" .. entity.name .. "\", \"" .. entity.related_transport_belt, 600)
+end
+for _, entity in pairs(data.raw["underground-belt"]) do
+    local related_belt = ""
+    for _, value in pairs(data.raw["transport-belt"]) do
+        if value.related_underground_belt == entity.name then
+            related_belt = value.name
+            break
+        end
+    end
+
+    apply_simulation(entity, "underground_belt\", \"" .. entity.name .. "\", \"" .. related_belt, 600)
+end
 
 if #extended > 0 then
     data:extend(extended)

@@ -58,6 +58,10 @@ modify(data.raw["inserter"]["bulk-inserter"], function(it)
     it.energy_source = { type = "void" }
 end)
 
+modify(data.raw["linked-belt"]["linked-belt"], function (it)
+    it.speed = 8
+end)
+
 modify(data.raw["item"]["solid-fuel"], function (it)
     it.burnt_result = nil
     it.fuel_value = "1QJ"

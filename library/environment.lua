@@ -16,6 +16,14 @@ function environment.viewport_height(tiles)
     game.simulation.camera_zoom = scale
 end
 
+---@param tiles uint
+function environment.viewport_width(tiles)
+    if tiles <= 12 or not game.simulation then return end
+    local required_width = tiles + 0.5
+    local scale = 25 / required_width
+    game.simulation.camera_zoom = scale
+end
+
 ---@param y number?
 function environment.center_viewport(y)
     if game.simulation then game.simulation.camera_position = { 0.5, y or 0 } end
@@ -105,6 +113,21 @@ function environment.paste(surface, position, data)
         string = data,
         force = "enemy"
     }
+end
+
+---@param surface LuaSurface
+---@param pos1 MapPosition Input belt location
+---@param pos2 MapPosition Output belt location
+---@param direction defines.direction Direction of the belt flow
+function environment.create_linked_belts(surface, pos1, pos2, direction)
+    local input_belt = surface.create_entity {
+        name = constants.mod_name .. "-linked-belt", position = pos1, direction = direction
+    }
+    local output_belt = surface.create_entity {
+        name = constants.mod_name .. "-linked-belt", position = pos2, direction = (direction + 8) % 16
+    }
+    output_belt.linked_belt_type = "output"
+    output_belt.connect_linked_belts(input_belt)
 end
 
 return environment
