@@ -1,6 +1,21 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.1.1
 Date: 26.11.2024
+  Features:
+    - Added simulation for roboport.
+    - Added simulations for transport belts.
+    - Added simulations for underground belts.
+    - Added simulations for splitters.
+  Scripting:
+    - Added `environment.viewport_width(tiles)`.
+      Works similarly to `environment.viewport_height(tiles)`, but instead ensures the viewport has the given tiles in width.
+    - Added `environment.create_linked_belts(surface, pos1, pos2, direction)`.
+      Creates two incredibly fast linked belts, which can be used with any belt type.
+    - Added optional second argument to `EventSequence.finish(length, offset)`.
+      Delays the execution of the event sequence.
+---------------------------------------------------------------------------------------------------
+Version: 0.1.1
+Date: 26.11.2024
   Changes:
     - Aligned the viewport for the active provider chest simulation.
   Info:
