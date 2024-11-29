@@ -78,12 +78,16 @@ modify(data.raw["loader-1x1"]["loader-1x1"], function(it)
     it.filter_count = 2
     it.per_lane_filters = true
     it.container_distance = 1
+    it.minable = { mining_time = 0.1, result = constants.mod_name .. "-loader-1x1" }
 end)
 
 modify(data.raw["item"]["solid-fuel"], function(it)
-    it.burnt_result = nil
     it.fuel_value = "1QJ"
     it.stack_size = 10000
+end)
+
+modify(data.raw["item"]["coal"], function (it)
+    it.fuel_value = "750kJ"
 end)
 
 data:extend(extended)

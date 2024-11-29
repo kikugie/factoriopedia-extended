@@ -84,24 +84,6 @@ function environment.roboport(surface, pos)
     return roboport
 end
 
---- Creates a container of the given time and inserts items into it.
----@param surface LuaSurface
----@param type string
----@param position MapPosition
----@param ... ItemStackIdentification
----@return LuaEntity?
-function environment.container(surface, type, position, ...)
-    local chest = surface.create_entity { name = type, position = position }
-    if not chest then return nil end
-    local inventory = chest.get_inventory(defines.inventory.chest)
-    if not inventory then return chest end
-    local args = { ... }
-    for _, value in pairs(args) do
-        inventory.insert(value)
-    end
-    return chest
-end
-
 --- Directly pastes the given blueprint string on the surface.
 ---@param surface LuaSurface
 ---@param position MapPosition
@@ -115,17 +97,44 @@ function environment.paste(surface, position, data)
     }
 end
 
----@param surface LuaSurface
----@param pos1 MapPosition Input belt location
----@param pos2 MapPosition Output belt location
----@param direction defines.direction Direction of the belt flow
-function environment.create_linked_belts(surface, pos1, pos2, direction)
-    local input_belt = surface.create_entity {
-        name = constants.mod_name .. "-linked-belt", position = pos1, direction = direction
+---@class CreateContainerParams
+---@field surface LuaSurface
+---@field type EntityID
+---@field position MapPosition
+---@field items ItemStackIdentification[]
+local CreateContainerParams = {}
+---@param param CreateContainerParams
+---@return LuaEntity
+function environment.create_container(param)
+    local position = utilities.get_map_position(param.position)
+    local chest = param.surface.create_entity { name = param.type, position = position }
+    if not chest then error("Failed to create entity") end
+    local inventory = chest.get_inventory(defines.inventory.chest)
+    if not inventory then error("Failed to get chest inventory") end
+    for _, value in pairs(param.items) do
+        inventory.insert(value)
+    end
+    return chest
+end
+
+---@class CreateLinkedBeltsParams
+---@field surface LuaSurface
+---@field input MapPosition
+---@field output MapPosition
+---@field direction defines.direction Direction of the belt flow
+local CreateLinkedBeltsParams = {}
+---@param param CreateLinkedBeltsParams
+function environment.create_linked_belts(param)
+    local input = utilities.get_map_position(param.input)
+    local output = utilities.get_map_position(param.output)
+
+    local input_belt = param.surface.create_entity {
+        name = constants.mod_name .. "-linked-belt", position = input, direction = param.direction
     }
-    local output_belt = surface.create_entity {
-        name = constants.mod_name .. "-linked-belt", position = pos2, direction = (direction + 8) % 16
+    local output_belt = param.surface.create_entity {
+        name = constants.mod_name .. "-linked-belt", position = output, direction = (param.direction + 8) % 16
     }
+    if not input_belt or not output_belt then error("Failed to create entities") end
     output_belt.linked_belt_type = "output"
     output_belt.connect_linked_belts(input_belt)
 end
@@ -140,34 +149,35 @@ local CreateSupplierParams = {}
 ---@param param CreateSupplierParams
 function environment.create_supplier(param)
     local offset = utilities.to_map_position((param.direction + 8) % 16)
-    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = param.position, direction = param.direction }
-    local chest = param.surface.create_entity { name = "infinity-chest", position = { param.position.x + offset.x, param.position.y + offset.y } }
+    local position = utilities.get_map_position(param.position)
+    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = position, direction = param.direction }
+    local chest = param.surface.create_entity { name = "infinity-chest", position = { position.x + offset.x, position.y + offset.y } }
     if not chest or not loader then error("Failed to create entities") end
 
     ---@type string|nil
     local left_filter = nil
-    if param.left_filter == nil then
-        left_filter = param.right_filter --[[@as string]]
-    elseif param.left_filter then
+    if param.left_filter then
         left_filter = param.left_filter --[[@as string]]
+    elseif not param.left_filter and param.left_filter ~= false then
+        left_filter = param.right_filter --[[@as string]]
     end
 
     ---@type string|nil
     local right_filter = nil
-    if param.right_filter == nil then
-        right_filter = param.left_filter --[[@as string]]
-    elseif param.left_filter then
-        right_filter = param.right_filter --[[@as string]]
+    if param.right_filter then
+        left_filter = param.right_filter --[[@as string]]
+    elseif not param.right_filter and param.right_filter ~= false then
+        left_filter = param.left_filter --[[@as string]]
     end
 
     if not left_filter and not right_filter then error("No filter specified") end
     if left_filter then
-        chest.set_infinity_container_filter(1, { index = 1, name = left_filter })
+        chest.set_infinity_container_filter(1, { index = 1, name = left_filter,count = 10 })
         loader.set_filter(1, { index = 1, name = left_filter })
     end
     if right_filter then
         if left_filter ~= right_filter then
-            chest.set_infinity_container_filter(2, { index = 2, name = right_filter })
+            chest.set_infinity_container_filter(2, { index = 2, name = right_filter,count = 10 })
         end
         loader.set_filter(2, { index = 2, name = right_filter })
     end
@@ -181,8 +191,9 @@ local CreateConsumerParams = {}
 ---@param param CreateConsumerParams
 function environment.create_consumer(param)
     local offset = utilities.to_map_position(param.direction)
-    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = param.position, direction = param.direction }
-    local chest = param.surface.create_entity { name = "infinity-chest", position = { param.position.x + offset.x, param.position.y + offset.y } }
+    local position = utilities.get_map_position(param.position)
+    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = position, direction = param.direction }
+    local chest = param.surface.create_entity { name = "infinity-chest", position = { position.x + offset.x, position.y + offset.y } }
     if not chest or not loader then error("Failed to create entities") end
     chest.remove_unfiltered_items = true
 end

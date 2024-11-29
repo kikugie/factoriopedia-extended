@@ -8,9 +8,7 @@ local belt_logistics = {}
 function belt_logistics.inserter(name)
     local surface = game.surfaces[1]
     environment.research_all()
-    environment.setup_electricity(surface)
-    game.simulation.camera_position = { 0.5, 0 }
-    game.forces["enemy"].mining_drill_productivity_bonus = 10
+    environment.center_viewport()
 
     -- Determine the pickup and drop positions of the inserter
     local inserter = prototypes.entity[name]
@@ -24,26 +22,51 @@ function belt_logistics.inserter(name)
     }
 
     -- Actors of this scene
-    local chest = environment.container(surface, "steel-chest", { 0, 0 }, { name = "iron-gear-wheel", count = 1000 })
-    local drop_inserter = surface.create_entity {
-        name = name, position = { -pickup.x, -pickup.y }, direction = defines.direction.west
+    environment.create_container {
+        surface = surface,
+        type = "steel-chest",
+        position = { 0, 0 },
+        items = { { name = "iron-gear-wheel", count = 1000 } }
     }
-    local pickup_inserter = surface.create_entity {
-        name = name, position = { -drop.x, -drop.y }, direction = defines.direction.west
-    }
-    environment.fuel(drop_inserter)
-    environment.fuel(pickup_inserter)
+    surface.create_entity { name = name, position = { -pickup.x, -pickup.y }, direction = defines.direction.west }
+    surface.create_entity { name = name, position = { -drop.x, -drop.y }, direction = defines.direction.west }
 
     -- Create a belt running across the viewport and loop it with linked belt
     local belt_start = { x = -pickup.x + drop.x, y = -pickup.y + drop.y }
     local belt_end = { x = -drop.x + pickup.x, y = -drop.y + pickup.y }
-    for x = belt_start.x, 8 do
-        surface.create_entity { name = "transport-belt", direction = defines.direction.east, position = { x, belt_start.y } }
-    end
-    for x = -8, belt_end.x do
+    local total_width = -belt_end.x + belt_start.x + 1
+    environment.viewport_width(total_width)
+
+    local west_border = math.min(belt_end.x - 1, -6)
+    local east_border = math.max(belt_start.x + 1, 6)
+
+    for x = west_border, belt_end.x do
         surface.create_entity { name = "transport-belt", direction = defines.direction.east, position = { x, belt_end.y } }
     end
-    environment.create_linked_belts(surface, { 9, belt_start.y }, { -9, belt_end.y }, defines.direction.east)
+    for x = belt_start.x, east_border do
+        surface.create_entity { name = "transport-belt", direction = defines.direction.east, position = { x, belt_start.y } }
+    end
+    environment.create_linked_belts {
+        surface = surface,
+        direction = defines.direction.east,
+        input = { east_border + 1, belt_start.y },
+        output = { west_border - 1, belt_end.y }
+    }
+
+    if inserter.electric_energy_source_prototype then environment.setup_electricity(surface) end
+    if not inserter.burner_prototype then return end
+    -- Fuck it, can't deal with the inserter math anymore
+    surface.create_entity { name = "burner-inserter", position = { -pickup.x, -pickup.y - 1 }, direction = defines.direction.north }
+    surface.create_entity { name = "burner-inserter", position = { -drop.x, -drop.y - 1 }, direction = defines.direction.north }
+    for x = west_border, east_border do
+        surface.create_entity { name = "transport-belt", direction = defines.direction.east, position = { x, -pickup.y - 2 } }
+    end
+    environment.create_supplier {
+        surface = surface,
+        position = { west_border - 1, -pickup.y - 2 },
+        direction = defines.direction.east,
+        right_filter = constants.mod_name .. "-coal"
+    }
 end
 
 function belt_logistics.belt(name)
@@ -60,7 +83,7 @@ function belt_logistics.belt(name)
         .insert { name = "iron-gear-wheel", count = 70 }
     surface.create_entity { name = "wooden-chest", position = { -8, 2 } }.get_inventory(defines.inventory.chest)
         .insert { name = "iron-gear-wheel", count = 70 }
-    environment.create_linked_belts(surface, { 9, 0 }, { -9, 0 }, defines.direction.east)
+    environment.create_linked_belts { surface = surface, direction = defines.direction.east, input = { 9, 0 }, output = { -9, 0 } }
 end
 
 function belt_logistics.underground_belt(name, related_belt)
@@ -90,7 +113,7 @@ function belt_logistics.underground_belt(name, related_belt)
         .insert { name = "iron-gear-wheel", count = gear_count }
     surface.create_entity { name = "wooden-chest", position = { -border, 2 } }.get_inventory(defines.inventory.chest)
         .insert { name = "iron-gear-wheel", count = gear_count }
-    environment.create_linked_belts(surface, { border + 1, 0 }, { -border - 1, 0 }, defines.direction.east)
+    environment.create_linked_belts { surface = surface, direction = defines.direction.east, input = { border + 1, 0 }, output = { -border - 1, 0 } }
 end
 
 function belt_logistics.splitter(name, related_belt)

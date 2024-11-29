@@ -46,8 +46,14 @@ function utilities.to_map_position(direction)
     elseif direction == defines.direction.south then
         return { 0, 1, x = 0, y = 1 }
     else
-        return { -1, 0, x = -1, y = 1 }
+        return { -1, 0, x = -1, y = 0 }
     end
+end
+
+---@param table table
+---@return MapPosition
+function utilities.get_map_position(table)
+    return { x = table.x or table[1], y = table.y or table[2] }
 end
 
 return utilities
