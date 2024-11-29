@@ -158,7 +158,7 @@ function environment.create_supplier(param)
     local left_filter = nil
     if param.left_filter then
         left_filter = param.left_filter --[[@as string]]
-    elseif not param.left_filter and param.left_filter ~= false then
+    elseif not param.left_filter and type(param) == "boolean" then
         left_filter = param.right_filter --[[@as string]]
     end
 
@@ -166,7 +166,7 @@ function environment.create_supplier(param)
     local right_filter = nil
     if param.right_filter then
         left_filter = param.right_filter --[[@as string]]
-    elseif not param.right_filter and param.right_filter ~= false then
+    elseif not param.right_filter and type(param) == "boolean" then
         left_filter = param.left_filter --[[@as string]]
     end
 
@@ -192,9 +192,10 @@ local CreateConsumerParams = {}
 function environment.create_consumer(param)
     local offset = utilities.to_map_position(param.direction)
     local position = utilities.get_map_position(param.position)
-    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = position, direction = param.direction }
+    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = position, direction = (param.direction + 8) % 16 }
     local chest = param.surface.create_entity { name = "infinity-chest", position = { position.x + offset.x, position.y + offset.y } }
     if not chest or not loader then error("Failed to create entities") end
+    loader.loader_type = "input"
     chest.remove_unfiltered_items = true
 end
 
