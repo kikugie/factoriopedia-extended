@@ -33,7 +33,7 @@ function bot_logistics.requester_chest()
 
     local requester = environment.container(surface, "requester-chest", { -2, 0 })
     local storage = environment.container(surface, "storage-chest", { 2, 0 })
-    ---@type Luabot_logisticsection
+    ---@type LuaLogisticSection
     local section = requester.get_logistic_sections().add_section("")
     section.active = false
     section.set_slot(1, { value = "iron-gear-wheel", min = 10 })
@@ -65,7 +65,7 @@ function bot_logistics.passive_provider_chest()
 
     local storage = environment.container(surface, "passive-provider-chest", { -2, 0 })
     local requester = environment.container(surface, "requester-chest", { 2, 0 })
-    ---@type Luabot_logisticsection
+    ---@type LuaLogisticSection
     local section = requester.get_logistic_sections().add_section("")
     section.active = false
     section.set_slot(1, { value = "iron-gear-wheel", min = 10 })

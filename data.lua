@@ -7,16 +7,26 @@ local dev_mode = settings.startup["factoriopedia-extended-dev-mode"].value
 
 ---@generic T : data.PrototypeBase
 ---@param prototype T
----@param action fun(it: T)
+---@param action fun(it: T)?
 local function modify(prototype, action)
     local copy = table.deepcopy(prototype)
     copy.name = constants.mod_name .. "-" .. prototype.name
     copy.hidden_in_factoriopedia = true
     if not dev_mode then copy.hidden = true end
-    action(copy)
+    if action then action(copy) end
     table.insert(extended, copy)
     if prototype.type ~= "item" then
-        modify(data.raw["item"][prototype.name], function (it)
+        local item = data.raw["item"][prototype.name]
+        if not item then
+            item = {
+                type = "item",
+                icon = prototype.icon,
+                name = prototype.name,
+                stack_size = 50,
+            }
+        end
+
+        modify(item, function(it)
             it.place_result = copy.name
         end)
     end
@@ -63,11 +73,14 @@ modify(data.raw["inserter"]["long-handed-inserter"], function(it)
     it.energy_source = { type = "void" }
 end)
 
-modify(data.raw["linked-belt"]["linked-belt"], function (it)
-    it.speed = 8
+modify(data.raw["linked-belt"]["linked-belt"])
+modify(data.raw["loader-1x1"]["loader-1x1"], function(it)
+    it.filter_count = 2
+    it.per_lane_filters = true
+    it.container_distance = 1
 end)
 
-modify(data.raw["item"]["solid-fuel"], function (it)
+modify(data.raw["item"]["solid-fuel"], function(it)
     it.burnt_result = nil
     it.fuel_value = "1QJ"
     it.stack_size = 10000
