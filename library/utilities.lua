@@ -36,4 +36,18 @@ function utilities.collect(source, transform)
     return result
 end
 
+---@param direction defines.direction
+---@return MapPosition
+function utilities.to_map_position(direction)
+    if direction == defines.direction.east then
+        return { 1, 0, x = 1, y = 0 }
+    elseif direction == defines.direction.north then
+        return { 0, -1, x = 0, y = -1 }
+    elseif direction == defines.direction.south then
+        return { 0, 1, x = 0, y = 1 }
+    else
+        return { -1, 0, x = -1, y = 1 }
+    end
+end
+
 return utilities

@@ -130,4 +130,61 @@ function environment.create_linked_belts(surface, pos1, pos2, direction)
     output_belt.connect_linked_belts(input_belt)
 end
 
+---@class CreateSupplierParams
+---@field surface LuaSurface
+---@field position MapPosition
+---@field direction defines.direction Direction of the output belt flow
+---@field left_filter string|boolean|nil Name of the item, false to block the lane, nil to duplicate the other
+---@field right_filter string|boolean|nil Name of the item, false to block the lane, nil to duplicate the other
+local CreateSupplierParams = {}
+---@param param CreateSupplierParams
+function environment.create_supplier(param)
+    local offset = utilities.to_map_position((param.direction + 8) % 16)
+    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = param.position, direction = param.direction }
+    local chest = param.surface.create_entity { name = "infinity-chest", position = { param.position.x + offset.x, param.position.y + offset.y } }
+    if not chest or not loader then error("Failed to create entities") end
+
+    ---@type string|nil
+    local left_filter = nil
+    if param.left_filter == nil then
+        left_filter = param.right_filter --[[@as string]]
+    elseif param.left_filter then
+        left_filter = param.left_filter --[[@as string]]
+    end
+
+    ---@type string|nil
+    local right_filter = nil
+    if param.right_filter == nil then
+        right_filter = param.left_filter --[[@as string]]
+    elseif param.left_filter then
+        right_filter = param.right_filter --[[@as string]]
+    end
+
+    if not left_filter and not right_filter then error("No filter specified") end
+    if left_filter then
+        chest.set_infinity_container_filter(1, { index = 1, name = left_filter })
+        loader.set_filter(1, { index = 1, name = left_filter })
+    end
+    if right_filter then
+        if left_filter ~= right_filter then
+            chest.set_infinity_container_filter(2, { index = 2, name = right_filter })
+        end
+        loader.set_filter(2, { index = 2, name = right_filter })
+    end
+end
+
+---@class CreateConsumerParams
+---@field surface LuaSurface
+---@field position MapPosition
+---@field direction defines.direction Direction of the input belt flow
+local CreateConsumerParams = {}
+---@param param CreateConsumerParams
+function environment.create_consumer(param)
+    local offset = utilities.to_map_position(param.direction)
+    local loader = param.surface.create_entity { name = constants.mod_name .. "-loader-1x1", position = param.position, direction = param.direction }
+    local chest = param.surface.create_entity { name = "infinity-chest", position = { param.position.x + offset.x, param.position.y + offset.y } }
+    if not chest or not loader then error("Failed to create entities") end
+    chest.remove_unfiltered_items = true
+end
+
 return environment
