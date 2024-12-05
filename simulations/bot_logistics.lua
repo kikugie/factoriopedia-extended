@@ -6,7 +6,7 @@ local bot_logistics = {}
 
 function bot_logistics.storage_chest()
     local surface = game.surfaces[1]
-    environment.center_viewport()
+    environment.configure_viewport { center = true }
     environment.create_roboport(surface, { 0, -5 })
     environment.setup_electricity(surface)
     game.simulation.camera_alt_info = true
@@ -21,7 +21,7 @@ function bot_logistics.storage_chest()
     local blueprint = environment.blueprint(blueprints.storage_chest)
     local sequence = new_sequence()
     sequence:event(30, function() -- Build green lamp from the chest
-        blueprint.build_blueprint { position = { 2, 0 }, force = "enemy" }
+        blueprint.build_blueprint { surface = surface, position = { 2, 0 }, force = "enemy" }
     end)
     sequence:event(180, function() -- Remove the lamp and store the item
         surface.deconstruct_area { area = { { 2, 0 }, { 2, 0 } }, force = "enemy" }
@@ -32,7 +32,7 @@ end
 function bot_logistics.requester_chest()
     local surface = game.surfaces[1]
     game.simulation.camera_alt_info = true
-    environment.center_viewport()
+    environment.configure_viewport { center = true }
     environment.create_roboport(surface, { -1, -5 })
 
     --  |    R   C    |  Chest setup
@@ -61,7 +61,7 @@ end
 function bot_logistics.passive_provider_chest()
     local surface = game.surfaces[1]
     game.simulation.camera_alt_info = true
-    environment.center_viewport()
+    environment.configure_viewport { center = true }
     environment.create_roboport(surface, { -1, -5 })
 
     --  |    P   R    |  Chest setup
@@ -90,7 +90,7 @@ end
 function bot_logistics.active_provider_chest()
     local surface = game.surfaces[1]
     game.simulation.camera_alt_info = true
-    environment.center_viewport()
+    environment.configure_viewport { center = true }
     environment.create_roboport(surface, { -1, -5 })
     environment.setup_electricity(surface)
 
@@ -114,7 +114,7 @@ end
 function bot_logistics.buffer_chest()
     local surface = game.surfaces[1]
     game.simulation.camera_alt_info = true
-    environment.center_viewport()
+    environment.configure_viewport { center = true }
     environment.create_roboport(surface, { -1, -5 })
 
     --  |   R B   C   |
@@ -154,13 +154,7 @@ end
 function bot_logistics.roboport(name)
     local surface = game.surfaces[1]
     local roboport = prototypes.entity[name]
-
-    if roboport.tile_width % 2 == 1 then
-        environment.center_viewport(-1)
-    else
-        game.simulation.camera_position = { 0, -1 }
-    end
-    environment.viewport_height(roboport.tile_height + 2)
+    environment.configure_viewport { center = roboport.tile_width % 2 == 1, height = roboport.tile_height + 2.5 }
     environment.setup_electricity(surface)
     environment.research_all()
 

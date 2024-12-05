@@ -43,30 +43,90 @@ function environment.surface(override)
 end
 
 environment.default_force = "enemy"
+local default_config = { ---@type ViewportConfig
+    zoom = 2,
+    width = 12.5,
+    height = 12.5 * 3 / 8,
+    pos = vector.standardize { 0, 0 },
+    box = {
+        vector.standardize { -12.5 / 2, -12.5 * 3 / 16 },
+        vector.standardize { 12.5 / 2, 12.5 * 3 / 16 },
+        left_top = vector.standardize { -12.5 / 2, -12.5 * 3 / 16 },
+        right_bottom = vector.standardize { 12.5 / 2, 12.5 * 3 / 16 }
+    },
+    tile_box = {
+        vector.standardize { math.floor(-12.5 / 2), math.floor(-12.5 * 3 / 16) },
+        vector.standardize { math.ceil(12.5 / 2), math.ceil(12.5 * 3 / 16) },
+        left_top = vector.standardize { math.floor(-12.5 / 2), math.floor(-12.5 * 3 / 16) },
+        right_bottom = vector.standardize { math.ceil(12.5 / 2), math.ceil(12.5 * 3 / 16) }
+    }
+}
 
---- Factoriopedia viewport is exactly 400x150 pixels, forming 8:3 ratio.
---- At camera scale 1.0 it's exactly 25 tiles wide.
---- This checks if the required height is more than the default and scales using these values.
----@param tiles uint
-function environment.viewport_height(tiles)
-    if tiles <= 4 or not game.simulation then return end
-    local required_height = tiles + 0.5
-    local normalized_height = 25 * 3 / 8
-    local scale = normalized_height / required_height
+---@param width number?
+---@param height number?
+---@return {zoom: number, width: number, height: number}
+local function set_boundaries(width, height)
+    local req_x = width or 0
+    local req_y = height or 0
+    if req_x <= default_config.width and req_y <= default_config.height then
+        return { zoom = default_config.zoom, width = default_config.width, height = default_config.height }
+    end
+
+    local required_height = math.max(req_x * 3 / 8, req_y)
+    local scale = default_config.height * default_config.zoom / required_height
     game.simulation.camera_zoom = scale
+    return { zoom = scale, width = required_height * 8 / 3, height = required_height }
 end
 
----@param tiles uint
-function environment.viewport_width(tiles)
-    if tiles <= 12 or not game.simulation then return end
-    local required_width = tiles + 0.5
-    local scale = 25 / required_width
-    game.simulation.camera_zoom = scale
-end
+---@class ViewportParam
+---@field width number? Required width
+---@field height number? Required height
+---@field pos MapPosition? Viewport center
+---@field center boolean?
+local ViewportParam = {}
+---@class ViewportConfig
+---@field width number available width in tiles
+---@field height number available height in tiles
+---@field zoom number current zoom scale
+---@field pos MapPosition
+---@field box BoundingBox
+---@field tile_box BoundingBox
+local ViewportConfig = {}
+---@param param ViewportParam?
+function environment.configure_viewport(param)
+    if not param then return default_config end
+    local position = { 0, 0 }
+    if param.pos then
+        position = param.pos
+    elseif param.center then
+        position = { 0, .5 }
+    end
+    game.simulation.camera_position = position
+    position = vector.standardize(position)
+    local bounds = set_boundaries(param.width, param.height)
 
----@param y number?
-function environment.center_viewport(y)
-    if game.simulation then game.simulation.camera_position = { 0.5, y or 0 } end
+    local top_left = vector.standardize { position.x - bounds.width / 2, position.y - bounds.height / 2 }
+    local bottom_right = vector.standardize { position.x + bounds.width / 2, position.y + bounds.height / 2 }
+    local tile_top_left = vector.standardize { math.floor(position.x - bounds.width / 2), math.floor(position.y - bounds.height / 2) }
+    local tile_bottom_right = vector.standardize { math.ceil(position.x + bounds.width / 2), math.ceil(position.y + bounds.height / 2) }
+    return {
+        zoom = bounds.zoom,
+        width = bounds.width,
+        height = bounds.height,
+        pos = position,
+        box = {
+            top_left,
+            bottom_right,
+            left_top = top_left,
+            right_bottom = bottom_right
+        },
+        tile_box = {
+            tile_top_left,
+            tile_bottom_right,
+            left_top = tile_top_left,
+            right_bottom = tile_bottom_right
+        }
+    }
 end
 
 function environment.research_all()
@@ -204,6 +264,7 @@ function environment.create_supplier(param)
         right_filter = param.right_filter
     end
 
+    if not left_filter and not right_filter then error "No filters set" end
     loader.set_filter(1, { index = 1, name = left_filter })
     loader.set_filter(2, { index = 2, name = right_filter })
     if left_filter ~= "deconstruction-planner" then

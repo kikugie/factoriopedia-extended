@@ -28,9 +28,9 @@ apply_simulation(data.raw["logistic-container"]["active-provider-chest"], "activ
 apply_simulation(data.raw["logistic-container"]["passive-provider-chest"], "passive_provider_chest")
 apply_simulation(data.raw["logistic-container"]["buffer-chest"], "buffer_chest")
 
-apply_to_group(data.raw["inserter"], "inserter", 420)
+apply_to_group(data.raw["inserter"], "inserter", 600)
 apply_to_group(data.raw["roboport"], "roboport")
-apply_to_group(data.raw["mining-drill"], "mining_drill")
+apply_to_group(data.raw["mining-drill"], "mining_drill", 600)
 apply_to_group(data.raw["transport-belt"], "belt", 600)
 for _, entity in pairs(data.raw["splitter"]) do
     apply_simulation(entity, "splitter\", \"" .. entity.name .. "\", \"" .. entity.related_transport_belt, 540)

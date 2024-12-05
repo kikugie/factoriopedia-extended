@@ -4,11 +4,11 @@ local function convert_direction(direction)
     -- Lookup for cardinal directions
     if direction == defines.direction.north then
         return { 0, -1 }
-    elseif direction == defines.direction.west then
+    elseif direction == defines.direction.east then
         return { 1, 0 }
     elseif direction == defines.direction.south then
         return { 0, 1 }
-    elseif direction == defines.direction.south then
+    elseif direction == defines.direction.west then
         return { -1, 0 }
     end
 

@@ -31,9 +31,9 @@ function EventSequence:finish(length, delay)
     end
 
     if delay then
-        script.on_nth_tick(delay, function(data)
+        script.on_nth_tick(delay - 1, function(data)
             if data.tick == 0 then return end
-            script.on_nth_tick(delay, nil)
+            script.on_nth_tick(delay - 1, nil)
             script.on_event(defines.events.on_tick, run)
         end)
     else

@@ -42,4 +42,40 @@ function table_extras.find_key(source, predicate)
     end
 end
 
+---@generic K, V
+---@param source table<K, V>
+---@param predicate fun(key: K, value: V): boolean|nil
+---@return V[]
+function table_extras.filter_values(source, predicate)
+    local result = {}
+    for key, value in pairs(source) do
+        if predicate(key, value) then table.insert(result, value) end
+    end
+    return result
+end
+
+---@generic K, V
+---@param source table<K, V>
+---@param predicate fun(key: K, value: V): boolean|nil
+---@return K[]
+function table_extras.filter_keys(source, predicate)
+    local result = {}
+    for key, value in pairs(source) do
+        if predicate(key, value) then table.insert(result, key) end
+    end
+    return result
+end
+
+---@generic K, V
+---@param source table<K, V>
+---@param predicate fun(key: K, value: V): boolean|nil
+---@return table<K, V>
+function table_extras.filter(source, predicate)
+    local result = {}
+    for key, value in pairs(source) do
+        if predicate(key, value) then result[key] = value end
+    end
+    return result
+end
+
 return table_extras
