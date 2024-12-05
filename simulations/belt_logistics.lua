@@ -24,7 +24,6 @@ function belt_logistics.inserter(name)
     -- Setup chest and inserters
     --  |     ICI     |
     environment.create_container {
-        surface = surface,
         type = "steel-chest",
         position = { 0, 0 },
         items = { { name = "iron-gear-wheel", count = 1000 } }
@@ -48,7 +47,6 @@ function belt_logistics.inserter(name)
         surface.create_entity { name = "transport-belt", direction = defines.direction.east, position = { x, belt_start.y } }
     end
     environment.create_linked_belts {
-        surface = surface,
         direction = defines.direction.east,
         input = { east_border + 1, belt_start.y },
         output = { west_border - 1, belt_end.y }
@@ -65,7 +63,6 @@ function belt_logistics.inserter(name)
         surface.create_entity { name = "transport-belt", direction = defines.direction.east, position = { x, -pickup.y - 2 } }
     end
     environment.create_supplier {
-        surface = surface,
         position = { west_border - 1, -pickup.y - 2 },
         direction = defines.direction.east,
         right_filter = constants.mod_name .. "-coal"
@@ -80,8 +77,8 @@ function belt_logistics.belt(name)
     for x = -7, 7 do
         surface.create_entity { name = name, position = { x, 0 }, direction = defines.direction.east }
     end
-    environment.create_supplier { surface = surface, direction = defines.direction.east, position = { -8, 0 }, left_filter = "iron-gear-wheel" }
-    environment.create_consumer { surface = surface, direction = defines.direction.east, position = { 8, 0 }, }
+    environment.create_supplier { direction = defines.direction.east, position = { -8, 0 }, left_filter = "iron-gear-wheel" }
+    environment.create_consumer { direction = defines.direction.east, position = { 8, 0 }, }
 end
 
 function belt_logistics.underground_belt(name, related_belt)
@@ -108,8 +105,8 @@ function belt_logistics.underground_belt(name, related_belt)
         surface.create_entity { name = related_belt, position = { x, 0 }, direction = defines.direction.east }
     end
     -- S|===>    <===|C Add item supplier and sink
-    environment.create_supplier { surface = surface, direction = defines.direction.east, position = { -border - 1, 0 }, left_filter = "iron-gear-wheel" }
-    environment.create_consumer { surface = surface, direction = defines.direction.east, position = { border + 2, 0 }, }
+    environment.create_supplier { direction = defines.direction.east, position = { -border - 1, 0 }, left_filter = "iron-gear-wheel" }
+    environment.create_consumer { direction = defines.direction.east, position = { border + 2, 0 }, }
 end
 
 function belt_logistics.splitter(name, related_belt)
@@ -141,10 +138,10 @@ function belt_logistics.splitter(name, related_belt)
     --  |    \\$//    |
     --  |    //$\\    |
     -- S|====/   \====|C
-    environment.create_supplier { surface = surface, direction = defines.direction.east, position = { -8, -2 }, left_filter = "iron-gear-wheel" }
-    environment.create_consumer { surface = surface, direction = defines.direction.east, position = { 8, -2 }, }
-    environment.create_supplier { surface = surface, direction = defines.direction.east, position = { -8, 1 }, right_filter = "copper-wire" }
-    environment.create_consumer { surface = surface, direction = defines.direction.east, position = { 8, 1 }, }
+    environment.create_supplier { direction = defines.direction.east, position = { -8, -2 }, left_filter = "iron-gear-wheel", right_filter = false }
+    environment.create_consumer { direction = defines.direction.east, position = { 8, -2 }, }
+    environment.create_supplier { direction = defines.direction.east, position = { -8, 1 }, left_filter = false, right_filter = "copper-wire" }
+    environment.create_consumer { direction = defines.direction.east, position = { 8, 1 }, }
 
     local sequence = new_sequence()
     sequence:event(0, function() -- Reset filter

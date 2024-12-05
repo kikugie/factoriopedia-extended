@@ -8,6 +8,7 @@ end
 
 scoop "simulations.bot_logistics"
 scoop "simulations.belt_logistics"
+scoop "simulations.manufacturing"
 scoop "simulations.miscellaneous"
 
 remote.add_interface(script.mod_name, functions)

@@ -12,6 +12,8 @@ local function modify(prototype, action)
     local copy = table.deepcopy(prototype)
     copy.name = constants.mod_name .. "-" .. prototype.name
     copy.hidden_in_factoriopedia = true
+    copy.placeable_by = { item = copy.name, count = 1}
+    copy.minable = { mining_time = 0.1, result = copy.name }
     if not dev_mode then copy.hidden = true end
     if action then action(copy) end
     table.insert(extended, copy)
@@ -27,6 +29,7 @@ local function modify(prototype, action)
         end
 
         modify(item, function(it)
+            it.subgroup = "other"
             it.place_result = copy.name
         end)
     end
@@ -78,7 +81,6 @@ modify(data.raw["loader-1x1"]["loader-1x1"], function(it)
     it.filter_count = 2
     it.per_lane_filters = true
     it.container_distance = 1
-    it.minable = { mining_time = 0.1, result = constants.mod_name .. "-loader-1x1" }
 end)
 
 modify(data.raw["item"]["solid-fuel"], function(it)
