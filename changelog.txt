@@ -1,5 +1,31 @@
 ---------------------------------------------------------------------------------------------------
 Version: 0.2.0
+Date: 06.12.2024
+  Changes:
+    - Added fuelling simulations for burner inserters and mining drills.
+    - Made splitter simulation more interesting to look at.
+    - Improved ore distribution around mining drills.
+  Scripting:
+    - Added `vector.lua` and `table_extras.lua` for vector and table operations respectively.
+    - Added `SurfaceProxy`, accessible from `environment.lua`.
+      `SurfaceProxy` is used to keep track of entities created in different contexts.
+      Can be created with `environment.surface()`
+    - Added functions in `environment.lua` to manage items and fluids.
+      `environment.create_supplier()` creates a loader and an infinity chest with the specified filter configuration.
+      `environment.create_consumer()` creates a loader and an infinity chest that sinks the incoming items.
+      `environment.connect_pipe()` connects an infinity pipe to the specified connection point and adds a fluid filter if needed.
+    - Replaced viewport management functions in `environment.lua` with a more comprehensive setup.
+      Removed `environment.viewport_height()`, `environment.viewport_width()` and `environment.center_viewport()`.
+      Added `environment.configure_viewport()`, which accepts the required width, height, camera position and adjusts the viewport to satisfy them.
+      This function returns the new viewport parameters, as well as its precise and rounded bounding boxes.
+  Fixes:
+    - Fixed pumpjacks using the solid drill simulation.
+  Notes:
+    - This update doesn't introduce any new simulations, but greatly expands the toolkit.
+      Most simulations are designed to be procedurally adjusted for the shown entity,
+      and taking every parameter into account is not a simple task.
+---------------------------------------------------------------------------------------------------
+Version: 0.2.0
 Date: 26.11.2024
   Features:
     - Added simulation for roboport.

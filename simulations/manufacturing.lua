@@ -28,76 +28,6 @@ local function get_fluid_points(prototype)
     return fluid_parameters
 end
 
---- Creates a new patch for this drill to mine every 5 seconds
----@param prototype LuaEntityPrototype
----@return function?
-local function setup_ore_sequence(prototype)
-    local surface = game.surfaces[1]
-
-    ---@param res string
-    ---@return LuaEntity[]
-    local function create_solid_ores(res)
-        local ores = {} ---@type LuaEntity[]
-        -- Approximate borders of the viewport
-        local x_offset = math.ceil((prototype.tile_height + 3.5) * 4 / 3)
-        local y_offset = math.ceil((prototype.tile_height + 3.5) / 2)
-        for x, y in utilities.box { { -x_offset, -y_offset }, { x_offset, y_offset } } do
-            --[[
-            Vanilla ores have different sprites at 80, 150, 400, 1300, 2900, 5500, 9500 and 15000 thresholds.
-            This roughly corresponds to 'y = 10.52378x^3.49348' formula, which is scaled down to 'y = 5x^3.5'.
-            The amount of the ore in each square is determined by it's distance from the drill, but inverted
-            to have maximum richness at the center and has a slight random offset.
-            Created ores are stored in an array to be able to delete them easily later.
-
-            Is this overengineered? Definitely yes.
-            ]]
-            local normalized_distance = math.min(math.sqrt(x * x + y * y) / x_offset, 1)
-            if normalized_distance == 1 then goto continue end
-            local ore_amount = (8 - normalized_distance * math.random(8, 10)) ^ 3.5 * 5
-            if ore_amount ~= ore_amount or ore_amount < 1 then goto continue end
-            local ore_entity = surface.create_entity { name = res, position = { x, y } }
-            ore_entity.amount = ore_amount
-            table.insert(ores, ore_entity)
-            ::continue::
-        end
-        return ores
-    end
-
-    ---@param res string
-    ---@return LuaEntity[]
-    local function create_fluid_ore(res)
-        return { surface.create_entity { name = res, position = { 0, 0 } } }
-    end
-
-    local patch_setters = {} ---@type {entity:string, setter:function}[]
-    local patch_entities = {} ---@type LuaEntity[]
-    local current_index = 0
-
-    for _, entity in pairs(prototypes.entity) do
-        local category = entity.resource_category
-        if not category or not prototype.resource_categories[category] then goto continue end
-        if category == "basic-solid" or category == "hard-solid" then
-            table.insert(patch_setters, { entity = entity, setter = create_solid_ores })
-        elseif category == "basic-fluid" then
-            table.insert(patch_setters, { entity = entity, setter = create_fluid_ore })
-        end
-        ::continue::
-    end
-
-    if #patch_setters == 0 then return nil end
-    return function()
-        -- Fuck 1 indexing
-        local entry = patch_setters[current_index + 1]
-        current_index = (current_index + 1) % #patch_setters
-
-        for _, ore in pairs(patch_entities) do
-            if ore.valid then ore.destroy() end
-        end
-        patch_entities = entry.setter(entry.entity.name)
-        return entry.entity
-    end
-end
-
 ---@param prototype LuaEntityPrototype
 local function solid_drill(prototype)
     local surface = game.surfaces[1]
@@ -109,6 +39,7 @@ local function solid_drill(prototype)
     }
     game.forces["enemy"].mining_drill_productivity_bonus = 10
 
+    -- Find resources this drill can mine. If there are none for some reason, place the entity and leave
     local accepted_categories = prototype.resource_categories ---@type {[string]: boolean}
     local accepted_resources = table_extras.filter_values(prototypes.entity, function(_, entity)
         return entity.resource_category and accepted_categories[entity.resource_category]
@@ -118,12 +49,14 @@ local function solid_drill(prototype)
         return
     end
 
+    -- Place a row of belts at the output position
     local output = vector.standardize(prototype.vector_to_place_result)
     for x = viewport.tile_box.left_top.x, viewport.tile_box.right_bottom.x do
         surface.create_entity { name = "transport-belt", position = { x, output.y }, direction = defines.direction.east }
     end
     environment.create_consumer { position = { viewport.tile_box.right_bottom.x + 1, output.y }, direction = defines.direction.east }
 
+    -- Find all fluid connections and filter out the bottommost ones used to mine a resource
     local fluid_points = get_fluid_points(prototype)
     local mining_fluid_points = {} ---@type FluidConnectionPoint[]
     local lowest_point = viewport.tile_box.left_top.y
@@ -137,6 +70,7 @@ local function solid_drill(prototype)
     if prototype.electric_energy_source_prototype then
         environment.setup_electricity(surface)
     elseif prototype.burner_prototype then
+        -- Run a belt below the drill and supply it with the cheap coal
         local belt_y = math.ceil(prototype.tile_height / 2) + 1
         for x = viewport.tile_box.left_top.x, viewport.tile_box.right_bottom.x do
             surface.create_entity { name = "transport-belt", position = { x, belt_y }, direction = defines.direction.west }
@@ -146,6 +80,7 @@ local function solid_drill(prototype)
             direction = defines.direction.west,
             left_filter = constants.mod_name .. "-coal"
         }
+        -- Find inserter position that doesn't intersect with pipe connection points
         local inserter_x = -math.floor(prototype.tile_width / 2)
         for x = inserter_x, inserter_x + prototype.tile_width do
             local fluid_point = table_extras.find_value(fluid_points, function(_, value)
@@ -160,6 +95,7 @@ local function solid_drill(prototype)
         end
     end
 
+    --- Create ore patch around the drill
     ---@param res string
     ---@return LuaEntity[]
     local function create_solid_ores(res)
@@ -197,6 +133,7 @@ local function solid_drill(prototype)
     local drill = nil ---@type LuaEntity?
     local resettable_entities = {} ---@type LuaEntity[]
     local sequence = new_sequence()
+    -- Reset ore patch, pipes and the drill itself every cycle
     sequence:event(0, function()
         for _, it in pairs(resettable_entities) do
             if it.valid then it.destroy() end

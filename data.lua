@@ -17,7 +17,9 @@ local function modify(prototype, action)
     if not dev_mode then copy.hidden = true end
     if action then action(copy) end
     table.insert(extended, copy)
-    if prototype.type ~= "item" then
+    if copy.type == "item" then
+        copy.subgroup = "other"
+    else
         local item = data.raw["item"][prototype.name]
         if not item then
             item = {
@@ -29,7 +31,6 @@ local function modify(prototype, action)
         end
 
         modify(item, function(it)
-            it.subgroup = "other"
             it.place_result = copy.name
         end)
     end
