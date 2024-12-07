@@ -1,18 +1,20 @@
 local constants = require "constants"
 
-local extended = {}
+local extended = {} ---@type data.PrototypeBase[]
+local modified = {} ---@type {[string]: boolean}
 
 ---@param prototype data.PrototypeBase
 ---@param name string
 ---@param prepare uint?
 local function apply_simulation(prototype, name, prepare)
-    if prototype.hidden or prototype.hidden_in_factoriopedia then return end
+    if not prototype or modified[prototype.name] or prototype.hidden or prototype.hidden_in_factoriopedia then return end
     prototype.factoriopedia_simulation = {
         mods = { constants.mod_name },
         init = [[remote.call("]] .. constants.mod_name .. [[", "]] .. name .. [[")]],
         init_update_count = prepare or 0
     }
     table.insert(extended, prototype)
+    modified[prototype.name] = true
 end
 
 local function apply_to_group(table, name, prepare)

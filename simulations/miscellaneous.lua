@@ -10,7 +10,7 @@ function miscellaneous.landfill()
     local surface = game.surfaces[1]
     environment.fill_tiles(surface, "water", { { -7, -3 }, { 8, 3 } })
     environment.create_roboport(surface, { 10, -6 })
-    environment.container(surface, "storage-chest", { -9, -5 }, "landfill")
+    environment.create_container { type = "storage-chest", position = { -9, -5 }, items = { "landfill" } }
 
     local player = game.simulation.create_test_player {
         name = "Player"

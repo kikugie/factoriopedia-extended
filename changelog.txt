@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------------------------------
-Version: 0.2.0
+Version: 0.3.0
 Date: 06.12.2024
   Changes:
     - Added fuelling simulations for burner inserters and mining drills.

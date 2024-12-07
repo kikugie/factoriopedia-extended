@@ -65,8 +65,8 @@ function bot_logistics.passive_provider_chest()
     environment.create_roboport(surface, { -1, -5 })
 
     --  |    P   R    |  Chest setup
-    local storage = environment.container(surface, "passive-provider-chest", { -2, 0 })
-    local requester = environment.container(surface, "requester-chest", { 2, 0 })
+    local storage = surface.create_entity { name = "passive-provider-chest", position = { -2, 0 } }
+    local requester = surface.create_entity { name = "requester-chest", position = { 2, 0 } }
     local section = requester.get_logistic_sections().add_section("")
     section.active = false
     section.set_slot(1, { value = "iron-gear-wheel", min = 10 })
@@ -101,7 +101,7 @@ function bot_logistics.active_provider_chest()
     end
     surface.create_entity { name = "fast-inserter", position = { -3, 0 }, direction = defines.direction.west }
     surface.create_entity { name = "active-provider-chest", position = { -2, 0 } }
-    local storage = surface.create_entity { name = "storage-chest", position = { -2, 0 } }
+    local storage = surface.create_entity { name = "storage-chest", position = { 2, 0 } }
     local inventory = storage.get_inventory(defines.inventory.chest)
 
     local sequence = new_sequence()
