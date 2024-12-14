@@ -160,7 +160,6 @@ end
 function manufacturing.mining_drill(name)
     local drill = prototypes.entity[name]
     local resources = drill.resource_categories
-    log(serpent.line(resources))
     if not resources then
         game.surfaces[1].create_entity { name = name, position = { 0, 0 } }
     elseif resources["basic-solid"] then
